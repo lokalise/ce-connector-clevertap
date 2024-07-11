@@ -1,0 +1,12 @@
+services:
+  ingress:
+    image: 053497547689.dkr.ecr.eu-central-1.amazonaws.com/autopilot/kargo-ingress:1.24.0-alpine3.17-slim
+    restart: unless-stopped
+    ports:
+      - '80:80'
+
+  app:
+    image: 053497547689.dkr.ecr.eu-central-1.amazonaws.com/${PROJECT}/app:${TAG}
+    restart: unless-stopped
+    env_file:
+      - ../.env.default
