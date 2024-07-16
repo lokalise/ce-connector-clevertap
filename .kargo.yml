@@ -8,9 +8,6 @@ jobs:
       kind: build
       parameters:
         command: bash scripts/build.sh
-    commitStatus:
-      default: true
-      context: "Build"
 
   - name: deploy-{{.PR}}
     node: {{ .Project }}-{{.PR}}
@@ -26,9 +23,6 @@ jobs:
         envFolder: deployment
     commands:
       - TAG=PRE-{{.PR}} deployment/deploy.kargo.sh
-    commitStatus:
-      default: true
-      context: "Kargo: Deploy"
 
  {{ if eq .PR "main"}}
   - name: release
