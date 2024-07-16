@@ -43,6 +43,9 @@ export type ConfigOverrides = {
   healthchecksEnabled?: boolean
 }
 
+const healthcheckEndpoints = ['/', '/health']
+const authenticationEndpoints = ['/auth', '/auth/response']
+
 export async function getApp(configOverrides: ConfigOverrides = {}) {
   const config = getConfig()
   const appConfig = config.app
@@ -72,9 +75,8 @@ export async function getApp(configOverrides: ConfigOverrides = {}) {
 
   await app.register(integrationConfigPlugin, {
     skipList: [
-      '/$', // Healthcheck
-      '/health$', // Healthcheck,
-      ...[`\\/auth$`].map((url) => `${versionPrefix}`.concat(url)),
+      ...healthcheckEndpoints,
+      ...authenticationEndpoints.map((url) => `${versionPrefix}`.concat(url)),
     ],
   })
 

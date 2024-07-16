@@ -22,7 +22,7 @@ describe('publishController e2e', () => {
       app = await getApp()
       await mockServer.start(mockPort)
       const { config } = app.diContainer.cradle
-      config.integrations.fakeStore.baseUrl = mockBaseUrl
+      config.integrations.clevertap.baseUrl = mockBaseUrl
     })
 
     afterAll(async () => {
