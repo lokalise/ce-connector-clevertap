@@ -1,0 +1,53 @@
+name: {{.Project}}
+jobs:
+  - name: build-{{.PR}}
+    noAgent: true
+    triggers:
+      githubHook: true
+    pipeline:
+      kind: build
+      parameters:
+        command: bash scripts/build.sh
+
+  - name: deploy-{{.PR}}
+    node: {{ .Project }}-{{.PR}}
+    instance:
+      health:
+        port: 80
+        statusCode: 200
+        path: /health
+    triggers:
+      upstream: build-{{.PR}}
+    secrets:
+      vault:
+        envFolder: deployment
+    commands:
+      - TAG=PRE-{{.PR}} deployment/deploy.kargo.sh
+
+ {{ if eq .PR "main"}}
+  - name: release
+    noAgent: true
+    triggers:
+      upstream: deploy-main
+    pipeline: |
+      node("build") {
+        git(branch: 'main', credentialsId: 'lokalise-engineering', url: 'git@github.com:lokalise/ce-connector-clevertap.git')
+        properties([
+          [$class: 'BuildBlockerProperty', useBuildBlocker: false],
+          disableConcurrentBuilds(),
+        ])
+
+        echo "Release started..."
+
+        stage("Create a git tag") {
+          withCredentials([
+            string(credentialsId: 'GH_TOKEN', variable: 'GITHUB_TOKEN'),
+            string(credentialsId: 'DOCKER_PASSWORD', variable: 'REGISTRY_PASSWORD')
+          ]) {
+            sh '''
+              docker/scripts/release.sh git_tag $(git rev-parse HEAD)
+            '''
+          }
+        }
+      }
+  {{ end }}
