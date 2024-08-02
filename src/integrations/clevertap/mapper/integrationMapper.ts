@@ -205,10 +205,8 @@ const buildUpdateTemplateBodiesForEmail = ({
     },
     labels: (metadata.labels as string) ?? null,
     partner: 'Lokalise',
-    createdAt: (metadata.createdAt as string) ?? null,
-    createdBy: (metadata.createdBy as string) ?? null,
-    updatedAt: (metadata.updatedAt as string) ?? null,
-    updatedBy: (metadata.updatedBy as string) ?? null,
+    createdBy: 'Lokalise',
+    updatedBy: 'Lokalise',
   }))
 }
 
@@ -225,7 +223,7 @@ const generateChildTemplateName = (
   availableLanguages: string[],
 ): Record<string, string> => {
   const record: Record<string, string> = {}
-  availableLanguages.forEach((language) => (record[language] = baseTemplateName + '__' + language))
+  availableLanguages.forEach((language) => (record[language] = baseTemplateName + '_' + language))
   return record
 }
 
@@ -289,6 +287,9 @@ const getTemplateFieldValue = ({
   templateType,
 }: TemplateFieldValueParams) => {
   if ((templateType as MessageMediumTypes) === MessageMediumTypes.Email) {
+    if(contentType === "html") {
+      contentType = "body"
+    }
     const value =
       template.templateData[contentType as keyof typeof template.templateData] ??
       template.templateData.senderDetail?.[

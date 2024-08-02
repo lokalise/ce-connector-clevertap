@@ -141,7 +141,6 @@ export async function getApp(configOverrides: ConfigOverrides = {}) {
   //   }),
   // )
   app.after(() => {
-    console.log('routeDefinitions.routes', routeDefinitions)
     routeDefinitions.routes.forEach((route) =>
       app.withTypeProvider<ZodTypeProvider>().route({
         ...route,

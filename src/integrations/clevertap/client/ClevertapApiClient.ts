@@ -41,33 +41,39 @@ export class ClevertapApiClient extends APIAbstract {
       throw new Error('CleverTap API base url is not provided')
     }
     super(baseUrl)
-    console.log({ baseUrl })
     this.hosts = [
       {
         region: 'us1',
-        host: baseUrl.replace('eu1', 'us1'),
+        host: this.getHost(baseUrl, 'us1'),
       },
       {
         region: 'eu1',
-        host: baseUrl,
+        host: this.getHost(baseUrl, 'eu1'),
       },
       {
         region: 'in1',
-        host: baseUrl.replace('eu1', 'in1'),
+        host: this.getHost(baseUrl, 'in1'),
       },
       {
         region: 'sg1',
-        host: baseUrl.replace('eu1', 'sg1'),
+        host: this.getHost(baseUrl, 'sg1'),
       },
       {
         region: 'aps3',
-        host: baseUrl.replace('eu1', 'aps3'),
+        host: this.getHost(baseUrl, 'aps3'),
       },
       {
         region: 'sk1',
-        host: 'https://sk1.wzrkt.com/'//baseUrl.replace('eu1', 'sk1'),
+        host: this.getHost(baseUrl, 'sk1'),
       },
     ]
+  }
+
+  private getHost(baseUrl: string, region: string): string {
+    if (region === 'sk1') {
+      return 'https://sk1-staging-6.wzrkt.com/'
+    }
+    return baseUrl.replace('eu1', 'us1');
   }
 
   public setAPIHost(config: IntegrationConfig): void {
@@ -79,12 +85,18 @@ export class ClevertapApiClient extends APIAbstract {
     this.setApiEndpoint(dynamicHost.host)
   }
 
-  async listItems() {
-    const response = await sendGet<ExternalItem[]>(this.httpClient, `/items`, {
-      retryConfig: RETRY_CONFIG,
+  async authorizeCredentials(accountId: string, passcode: string) {
+    return this.get<AuthorizationApiResponseForSuccess>('/v1/connect', {
+      headers: {
+        'X-CleverTap-Account-Id': accountId,
+        'X-CleverTap-Passcode': passcode,
+        'content-type': 'application/json',
+      },
+      query: {
+        partner: 'lokalise',
+      },
+      requestLabel: 'authorizeCredentials',
     })
-
-    return response.result.body
   }
 
   public async getTemplates(
@@ -108,7 +120,7 @@ export class ClevertapApiClient extends APIAbstract {
     pageNumber: number,
     pageSize: number,
   ) {
-    return this.get<ClevertapTemplatesList>('/v1/email/templates/', {
+    return this.get<ClevertapTemplatesList>('/v1/email/templates/localise/', {
       headers: {
         'X-CleverTap-Account-Id': accountId,
         'X-CleverTap-Passcode': passcode,
@@ -119,20 +131,6 @@ export class ClevertapApiClient extends APIAbstract {
         pageSize,
       },
       requestLabel: 'getEmailTemplate',
-    })
-  }
-
-  async authorizeCredentials(accountId: string, passcode: string) {
-    return this.get<AuthorizationApiResponseForSuccess>('/v1/connect', {
-      headers: {
-        'X-CleverTap-Account-Id': accountId,
-        'X-CleverTap-Passcode': passcode,
-        'content-type': 'application/json',
-      },
-      query: {
-        partner: 'zapier',
-      },
-      requestLabel: 'authorizeCredentials',
     })
   }
 
@@ -151,7 +149,7 @@ export class ClevertapApiClient extends APIAbstract {
   }
 
   public async getEmailTemplateById({ accountId, passcode, templateId }: getTemplateByIdParams) {
-    return this.get<ClevertapEmailTemplate>('/v1/templates/email', {
+    return this.get<ClevertapEmailTemplate>('/v1/email/templates/localise', {
       headers: {
         'X-CleverTap-Account-Id': accountId,
         'X-CleverTap-Passcode': passcode,
@@ -183,7 +181,7 @@ export class ClevertapApiClient extends APIAbstract {
     passcode: string,
     updateTemplatePayload: UpdateEmailTemplateRequestBody,
   ) {
-    return this.post<SuccessMessageResponse>('/v1/templates/email/update', {
+    return this.post<SuccessMessageResponse>('/v1/email/templates/localise/upsert', {
       headers: {
         'X-CleverTap-Account-Id': accountId,
         'X-CleverTap-Passcode': passcode,
