@@ -7,7 +7,7 @@ import type { IntegrationConfig } from '../../../types'
 
 import { APIAbstract } from './APIAbstract'
 import {
-  AuthorizationApiResponseForSuccess,
+  ClevertapAuthorizationApiResponse,
   ClevertapEmailTemplate,
   ClevertapTemplatesList,
   ExternalItem,
@@ -86,7 +86,7 @@ export class ClevertapApiClient extends APIAbstract {
   }
 
   async authorizeCredentials(accountId: string, passcode: string) {
-    return this.get<AuthorizationApiResponseForSuccess>('/v1/connect', {
+    return this.get<ClevertapAuthorizationApiResponse>('/v1/connect', {
       headers: {
         'X-CleverTap-Account-Id': accountId,
         'X-CleverTap-Passcode': passcode,
