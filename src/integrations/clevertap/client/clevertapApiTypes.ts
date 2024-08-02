@@ -7,9 +7,11 @@ export type ExternalItem = {
   name: string
 }
 
-export type AuthorizationApiResponseForSuccess = {
+export type ClevertapAuthorizationApiResponse = {
   status: string
-  message: string
+  message?: string
+  error?: string
+  code?: string
 }
 
 export enum MessageMediumTypes {
