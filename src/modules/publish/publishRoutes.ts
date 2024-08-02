@@ -12,6 +12,7 @@ export const publishRouteDefinition: Routes = [
       body: publishRequestBody,
       response: {
         200: publishResponseBody,
+        207: publishResponseBody,
       },
     },
   },

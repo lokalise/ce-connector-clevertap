@@ -14,9 +14,10 @@ export const postAuth = async (req: FastifyRequest, reply: PostAuthResponse) => 
     const authConfig = await authService.validate(req.integrationConfig)
     await reply.send(authConfig)
   } catch (err) {
-    return await reply.status(403).send({
+    await reply.status(403).send({
       message: 'Could not authenticate to CleverTap using the credentials provided.',
-      details: err,
+      errorCode: '403',
+      details: { err },
     })
   }
 }
@@ -24,15 +25,14 @@ export const postAuth = async (req: FastifyRequest, reply: PostAuthResponse) => 
 export const postAuthRefresh = async (req: FastifyRequest, reply: PostAuthRefreshResponse) => {
   const { authService } = req.diScope.cradle
 
-  const authConfig = await authService.refresh(req.integrationConfig, req.authConfig)
-
-  if (!authConfig) {
+  try {
+    const authConfig = await authService.refresh(req.integrationConfig, req.authConfig)
+    await reply.send(authConfig)
+  } catch (err) {
     await reply.status(403).send({
       message: 'Could not authenticate to 3rd party using the provided key.',
-      statusCode: 403,
+      errorCode: '403',
+      details: { err },
     })
-    return
   }
-
-  return reply.send(authConfig)
 }
