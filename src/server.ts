@@ -19,7 +19,6 @@ async function start() {
   })
 
   try {
-    console.log('try block')
     await app.listen({
       host: config.app.bindAddress,
       port: config.app.port,

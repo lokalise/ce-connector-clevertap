@@ -15,8 +15,8 @@ export async function getCache(req: FastifyRequest, reply: ListCacheResponse) {
   } catch (err) {
     await reply.status(403).send({
       message: 'Error while fetching all the templates from CleverTap',
-      errorCode: 403,
-      details: err,
+      errorCode: '403',
+      details: { err },
     })
   }
 }
@@ -44,13 +44,12 @@ export async function getCacheItems(
           },
         },
       })
-    } else {
-      return await reply.send({
-        items,
-      })
     }
-  } catch (error) {
     await reply.send({
+      items,
+    })
+  } catch (error) {
+    await reply.status(403).send({
       message: 'Error while fetching cache items from CleverTap',
       errorCode: 'ERROR_IN_FETCHING_CACHE_ITEMS',
       details: { error },

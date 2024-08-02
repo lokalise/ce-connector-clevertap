@@ -37,7 +37,6 @@ export function registerDependencies(
     publishService: asClass(PublishService, SINGLETON_CONFIG),
   }
   diContainer.register(diConfig)
-  console.log({ diContainer })
 
   for (const [dependencyKey, dependencyValue] of Object.entries(dependencyOverrides)) {
     diContainer.register(dependencyKey, dependencyValue)

@@ -29,8 +29,9 @@ export type ApiRequest = {
 
 export type SuccessMessageResponse = {
   msg: string
-  code: string
-  params: Record<string, unknown>
+  baseTemplateId: number
+  locale: string
+  status: string
 }
 
 export interface CacheItemStructure extends Record<string, string> {

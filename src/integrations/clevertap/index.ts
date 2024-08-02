@@ -15,7 +15,6 @@ import clevertapMapper, {
   buildPerLocaleErrors,
   buildTranslatePublishError,
 } from './mapper/integrationMapper'
-import { filterBaseEmailTempelates } from './Utils/utils'
 import {
   CacheItemStructure,
   LocalesAvailable,
@@ -149,20 +148,17 @@ export const listItems = async (
       getTemplatePromises.push(promise)
     }
 
-    const allTemplates: ClevertapTemplatesListItem[] = []
+    const templates: ClevertapTemplatesListItem[] = []
     await Promise.allSettled(getTemplatePromises).then((promiseOutcome) => {
       promiseOutcome.forEach((promiseOutcome) => {
         if (isFulfilled(promiseOutcome)) {
           const templatesPerPage: ClevertapTemplatesListItem[] = promiseOutcome.value.templates
-          allTemplates.push(...templatesPerPage)
+          templates.push(...templatesPerPage)
         } else {
           throw new CouldNotRetrieveTemplates({ messageMedium })
         }
       })
     })
-
-    // Get all the base templates by filtering out child templates
-    const templates = filterBaseEmailTempelates(allTemplates)
 
     // Build item identifiers from the fetched templates
     return clevertapMapper.buildItemIdentifiersFromTemplates({
