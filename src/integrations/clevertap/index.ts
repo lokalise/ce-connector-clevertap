@@ -26,6 +26,7 @@ import {
   ErrorInfoWithPerLocaleErrors,
 } from '../../infrastructure/errors/MultiStatusErrorResponse'
 import type { errors } from 'undici'
+import { globalLogger } from '../../infrastructure/errors/globalErrorHandler'
 
 const IDENTIFIER_SEPARATOR = '||'
 
@@ -101,10 +102,14 @@ export const validate = async (
   passcode: string,
   region: string,
 ): Promise<AuthConfig> => {
+  globalLogger.info('accountId: %s, passcode: %s, region: %s ', accountId, passcode, region)
   const response = await clevertapApiClient.authorizeCredentials(accountId, passcode)
+  globalLogger.info(response, 'Got a response from auth api')
   if (response.status == 'fail') {
+    globalLogger.error(response, 'Auth failed due to invalid credentials')
     throw new AuthFailedError()
   }
+  globalLogger.info('Successful Authentication')
   return { accountId: accountId, passcode: passcode, region: region }
 }
 
