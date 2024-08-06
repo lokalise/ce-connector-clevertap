@@ -2,6 +2,7 @@ import type { Routes } from '../commonTypes'
 
 import { publishContent } from './publishController'
 import { publishRequestBody, publishResponseBody } from './publishSchemas'
+import { apiError } from '../commonSchemas'
 
 export const publishRouteDefinition: Routes = [
   {
@@ -13,6 +14,7 @@ export const publishRouteDefinition: Routes = [
       response: {
         200: publishResponseBody,
         207: publishResponseBody,
+        403: apiError,
       },
     },
   },
