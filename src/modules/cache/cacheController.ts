@@ -3,16 +3,19 @@ import type { FastifyRequest } from 'fastify'
 import { MultiStatusErrorCode } from '../../infrastructure/errors/MultiStatusErrorResponse'
 
 import type { CacheRequestBody, CacheResponse, ListCacheResponse } from './cacheTypes'
+import { globalLogger } from '@lokalise/node-core'
 
 export async function getCache(req: FastifyRequest, reply: ListCacheResponse) {
   const { cacheService } = req.diScope.cradle
 
   try {
     const items = await cacheService.listItems(req.integrationConfig, req.authConfig)
+    globalLogger.info(items, '/cache endpoint cache items result is: ')
     await reply.send({
       items,
     })
   } catch (err) {
+    globalLogger.error(err, 'Exception occurred in getting cache items')
     await reply.status(403).send({
       message: 'Error while fetching all the templates from CleverTap',
       errorCode: '403',
@@ -33,6 +36,7 @@ export async function getCacheItems(
       req.body.items,
     )
     if (errors.length) {
+      globalLogger.info(errors, 'Errors while fetching some of the items')
       await reply.code(207).send({
         statusCode: 207,
         items,
@@ -45,14 +49,16 @@ export async function getCacheItems(
         },
       })
     }
+    globalLogger.info('Get api call for /cache/items endpoint is successful')
     await reply.send({
       items,
     })
-  } catch (error) {
+  } catch (err) {
+    globalLogger.info(err, 'Exception occurred in getting cache-items structure')
     await reply.status(403).send({
       message: 'Error while fetching cache items from CleverTap',
       errorCode: 'ERROR_IN_FETCHING_CACHE_ITEMS',
-      details: { error },
+      details: { err },
     })
   }
 }

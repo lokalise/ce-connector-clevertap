@@ -21,6 +21,7 @@ import {
   UpdateEmailTemplateRequestBody,
   UpdateTemplateParams,
 } from '../types'
+import { globalLogger } from '../../../infrastructure/errors/globalErrorHandler'
 
 const RETRY_CONFIG = {
   retryOnTimeout: false,
@@ -80,9 +81,11 @@ export class ClevertapApiClient extends APIAbstract {
     const region = config?.region ?? 'eu1'
     const dynamicHost = this.hosts.find((host) => host.region == region)
     if (!dynamicHost) {
+      globalLogger.error(region, 'Error while setting region for region: ')
       throw new Error('Invalid data center host provided')
     }
     this.setApiEndpoint(dynamicHost.host)
+    globalLogger.info('Region is set successfully with api url as: %s', dynamicHost.host)
   }
 
   async authorizeCredentials(accountId: string, passcode: string) {
