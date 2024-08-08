@@ -14,11 +14,11 @@ pipeline {
           // Set REPO_NAME using shell command and assign to env variable
           env.REPO_NAME = sh(script: 'basename -s .git "$GIT_URL"', returnStdout: true).trim()
 
-          echo "TAG      : ${env.TAG}"
+          echo "TAG: ${env.TAG}"
           echo "REPO_NAME: ${env.REPO_NAME}"
 
           build(
-            job: 'cteng/temp-ce-connector-clevertap/promote',
+            job: "cteng/${env.REPO_NAME}/promote"
             wait: false,
             parameters: [
               [$class: 'StringParameterValue', name: 'TAG', value: "7"],
