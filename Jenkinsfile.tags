@@ -20,7 +20,7 @@ pipeline {
           REPO_NAME=$(basename -s .git "$GIT_URL")
         '''
         build(
-          job: "cteng/temp-${REPO_NAME}/promote",
+          job: "cteng/temp-ce-connector-clevertap/promote",
           wait: false,
           parameters: [
             [$class: 'StringParameterValue', name: 'TAG', value: "7"],
