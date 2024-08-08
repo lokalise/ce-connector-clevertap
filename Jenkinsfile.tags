@@ -19,7 +19,7 @@ pipeline {
           job: 'cteng/temp-ce-connector-clevertap/promote',
           wait: false,
           parameters: [
-            [$class: 'StringParameterValue', name: 'TAG', value: "17"],
+            [$class: 'StringParameterValue', name: 'TAG', value: "7"],
             [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
             [$class: 'StringParameterValue', name: 'APP_NAME', value: "ce-connector-clevertap"],
           ]
