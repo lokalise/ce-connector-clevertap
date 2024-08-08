@@ -9,9 +9,9 @@ pipeline {
 
   stages {
     stage('Triggers build on tag push') {
-      when {
-        tag pattern: "\\d+", comparator: "REGEXP"
-      }
+      // when {
+      //   tag pattern: "\\d+", comparator: "REGEXP"
+      // }
 
       steps {
         sh 'echo ${TAG}'
