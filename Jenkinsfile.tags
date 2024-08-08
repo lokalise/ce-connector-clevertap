@@ -3,11 +3,6 @@ pipeline {
     label 'build'
   }
 
-  environment {
-    TAG = "${env.TAG_NAME}"
-    REPO_NAME = ""
-  }
-
   stages {
     stage('Triggers build on tag push') {
       // when {
@@ -15,21 +10,24 @@ pipeline {
       // }
 
       steps {
-        sh '''
-          echo "TAG: $TAG"
-          REPO_NAME=$(basename -s .git "$GIT_URL")
-        '''
-        build(
-          job: "cteng/temp-ce-connector-clevertap/promote",
-          wait: false,
-          parameters: [
-            [$class: 'StringParameterValue', name: 'TAG', value: "7"],
-            [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
-            [$class: 'StringParameterValue', name: 'APP_NAME', value: "${REPO_NAME}"],
-          ]
-        )
+        script {
+          // Set REPO_NAME using shell command and assign to env variable
+          env.REPO_NAME = sh(script: 'basename -s .git "$GIT_URL"', returnStdout: true).trim()
+
+          echo "TAG      : ${env.TAG}"
+          echo "REPO_NAME: ${env.REPO_NAME}"
+
+          build(
+            job: 'cteng/temp-ce-connector-clevertap/promote',
+            wait: false,
+            parameters: [
+              [$class: 'StringParameterValue', name: 'TAG', value: "7"],
+              [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
+              [$class: 'StringParameterValue', name: 'APP_NAME', value: "${env.REPO_NAME}"],
+            ]
+          )
+        }
       }
     }
   }
 }
-
