@@ -5,6 +5,7 @@ pipeline {
 
   environment {
     TAG = "${env.TAG_NAME}"
+    REPO_NAME = ""
   }
 
   stages {
@@ -14,14 +15,17 @@ pipeline {
       // }
 
       steps {
-        sh 'echo ${TAG} && env'
+        sh '''
+          echo "TAG: $TAG"
+          REPO_NAME=$(basename -s .git "$GIT_URL")
+        '''
         build(
-          job: 'cteng/temp-ce-connector-clevertap/promote',
+          job: "cteng/temp-${REPO_NAME}/promote",
           wait: false,
           parameters: [
             [$class: 'StringParameterValue', name: 'TAG', value: "7"],
             [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
-            [$class: 'StringParameterValue', name: 'APP_NAME', value: "ce-connector-clevertap"],
+            [$class: 'StringParameterValue', name: 'APP_NAME', value: "${REPO_NAME}"],
           ]
         )
       }
