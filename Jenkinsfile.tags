@@ -12,13 +12,13 @@ pipeline {
       steps {
         script {
           env.REPO_NAME = sh(script: 'basename -s .git "$GIT_URL"', returnStdout: true).trim()
-          env.JOB_NAME = "cteng/temp/${env.REPO_NAME}/promote"
+          env.PROMOTE_JOB_NAME = "cteng/temp/${env.REPO_NAME}/promote"
 
           echo "TAG: ${env.TAG}"
           echo "Job Name: ${env.JOB_NAME}"
 
           build(
-            job: env.JOB_NAME,
+            job: env.PROMOTE_JOB_NAME,
             wait: false,
             parameters: [
               [$class: 'StringParameterValue', name: 'TAG', value: "7"],
