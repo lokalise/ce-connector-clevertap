@@ -15,7 +15,6 @@ pipeline {
           env.JOB_NAME = "cteng/temp-${env.REPO_NAME}/promote"
 
           echo "TAG: ${env.TAG}"
-          echo "REPO_NAME: ${env.REPO_NAME}"
           echo "Job Name: ${env.JOB_NAME}"
 
           build(
@@ -24,7 +23,6 @@ pipeline {
             parameters: [
               [$class: 'StringParameterValue', name: 'TAG', value: "7"],
               [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
-              [$class: 'StringParameterValue', name: 'APP_NAME', value: "${env.REPO_NAME}"]
             ]
           )
         }
