@@ -12,7 +12,7 @@ pipeline {
       steps {
         script {
           env.REPO_NAME = sh(script: 'basename -s .git "$GIT_URL"', returnStdout: true).trim()
-          env.JOB_NAME = "cteng/${env.REPO_NAME}/promote"
+          env.JOB_NAME = "cteng/temp-${env.REPO_NAME}/promote"
 
           echo "TAG: ${env.TAG}"
           echo "REPO_NAME: ${env.REPO_NAME}"
