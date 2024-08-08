@@ -16,7 +16,7 @@ pipeline {
       steps {
         sh 'echo ${TAG}'
         build(
-          job: 'cteng/conn-clevertap/promote',
+          job: 'cteng/temp-ce-connector-clevertap/promote',
           wait: false,
           parameters: [
             [$class: 'StringParameterValue', name: 'TAG', value: "${TAG}"],
