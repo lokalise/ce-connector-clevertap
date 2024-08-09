@@ -1,7 +1,5 @@
 // TODO: fakeIntegration connector 3-rd party client implementation
 
-import { sendGet } from '@lokalise/node-core'
-
 import type { Dependencies } from '../../../infrastructure/diConfig'
 import type { IntegrationConfig } from '../../../types'
 
@@ -10,7 +8,6 @@ import {
   ClevertapAuthorizationApiResponse,
   ClevertapEmailTemplate,
   ClevertapTemplatesList,
-  ExternalItem,
   getTemplateByIdParams,
   MessageMediumTypes,
   TemplateByIdParams,
@@ -22,13 +19,6 @@ import {
   UpdateTemplateParams,
 } from '../types'
 import { globalLogger } from '../../../infrastructure/errors/globalErrorHandler'
-
-const RETRY_CONFIG = {
-  retryOnTimeout: false,
-  statusCodesToRetry: [500, 502, 503],
-  maxAttempts: 5,
-  delayBetweenAttemptsInMsecs: 250,
-}
 
 export class ClevertapApiClient extends APIAbstract {
   private hosts: {
@@ -45,36 +35,29 @@ export class ClevertapApiClient extends APIAbstract {
     this.hosts = [
       {
         region: 'us1',
-        host: this.getHost(baseUrl, 'us1'),
+        host: 'https://us1.api.clevertap.com/',
       },
       {
         region: 'eu1',
-        host: this.getHost(baseUrl, 'eu1'),
+        host: 'https://eu1.api.clevertap.com/',
       },
       {
         region: 'in1',
-        host: this.getHost(baseUrl, 'in1'),
+        host: 'https://in1.api.clevertap.com/',
       },
       {
         region: 'sg1',
-        host: this.getHost(baseUrl, 'sg1'),
+        host: 'https://sg1.api.clevertap.com/',
       },
       {
         region: 'aps3',
-        host: this.getHost(baseUrl, 'aps3'),
+        host: 'https://aps3.api.clevertap.com/',
       },
       {
         region: 'sk1',
-        host: this.getHost(baseUrl, 'sk1'),
+        host: 'https://sk1-staging-6.wzrkt.com/',
       },
     ]
-  }
-
-  private getHost(baseUrl: string, region: string): string {
-    if (region === 'sk1') {
-      return 'https://sk1-staging-6.wzrkt.com/'
-    }
-    return baseUrl.replace('eu1', 'us1');
   }
 
   public setAPIHost(config: IntegrationConfig): void {
