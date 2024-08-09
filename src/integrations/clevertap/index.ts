@@ -28,11 +28,6 @@ import {
 import type { errors } from 'undici'
 import { globalLogger } from '../../infrastructure/errors/globalErrorHandler'
 
-const IDENTIFIER_SEPARATOR = '||'
-
-const buildUniqueId = (templateId: string, contentType: string) =>
-  `${templateId}${IDENTIFIER_SEPARATOR}${contentType}`
-
 export const publishContent = async (
   clevertapApiClient: ClevertapApiClient,
   accountId: string,
@@ -41,18 +36,31 @@ export const publishContent = async (
 ): Promise<{
   errors: ErrorInfoWithPerLocaleErrors[]
 }> => {
+  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   const publishErrors: ErrorInfoWithPerLocaleErrors[] = []
   const baseTemplateIds = [...new Set(items.map((item) => item.groupId))]
   const updateTemplatesRequests = baseTemplateIds.map(async (baseTemplateId) => {
+    globalLogger.info(
+      'Publishing translated templated for baseTemplateId: %s started',
+      baseTemplateId,
+    )
     const templateTranslatableItems = items.filter((item) => item.groupId === baseTemplateId)
+    globalLogger.info(templateTranslatableItems, 'templateTranslatableItems object is')
     const templateType = templateTranslatableItems[0].metadata.templateType as string
     const availableLanguages = getTemplateAvailableLanguages(templateTranslatableItems)
+    globalLogger.info(
+      availableLanguages,
+      'Creating child templates for for baseTemplateId: %s, template type: %s, available languages: ',
+      baseTemplateId,
+      templateType,
+    )
     const updateTemplatePayloads = clevertapMapper.buildUpdateTemplateRequestBodies({
       baseTemplateId,
       templateTranslatableItems,
       availableLanguages,
       templateType,
     })
+    globalLogger.info('Translated templates are ready to be exported')
     const updateSettledResult = await Promise.allSettled(
       updateTemplatePayloads.map((updateTemplatePayload) =>
         clevertapApiClient.updateTemplate({
@@ -63,7 +71,7 @@ export const publishContent = async (
         }),
       ),
     )
-
+    globalLogger.info('List of promise created for all the translations to be exported')
     updateSettledResult.forEach((result, index) => {
       const updatingLocale = updateTemplatePayloads[index]?.locale
       if (isRejected(result) && updatingLocale) {
@@ -89,6 +97,7 @@ export const publishContent = async (
   })
 
   await Promise.all(updateTemplatesRequests)
+  globalLogger.info('Process for exporting translated templates completed')
   return { errors: publishErrors }
 }
 
@@ -127,6 +136,7 @@ export const listItems = async (
   accountId: string,
   passcode: string,
 ): Promise<ItemIdentifiers[]> => {
+  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   // Map over each message medium type and fetch templates
   const listItemsPromises = Object.values(MessageMediumTypes).map(async (messageMedium) => {
     // Fetch the total number of templates for the current message medium type
@@ -137,10 +147,19 @@ export const listItems = async (
       1,
       1,
     )
-
+    globalLogger.info(
+      'Got the total number of templates from get api which is: %d for the template type: %s',
+      total,
+      messageMedium,
+    )
     // Fetch all the templates for the current message medium type in batch of 25 templates per request
     const pageSize: number = 25
     const numOfPages: number = Math.ceil(total / pageSize)
+    globalLogger.info(
+      'Got the total number of get calls from get api which is: %d for the template type: %s',
+      numOfPages,
+      messageMedium,
+    )
     const getTemplatePromises: Promise<ClevertapTemplatesList>[] = []
     for (let i = 1; i <= numOfPages; i++) {
       const promise: Promise<ClevertapTemplatesList> = clevertapApiClient.getTemplates(
@@ -152,19 +171,30 @@ export const listItems = async (
       )
       getTemplatePromises.push(promise)
     }
-
+    globalLogger.info(
+      'List of promise returned for all the templates for getTemplates api for template type: %s',
+      messageMedium,
+    )
     const templates: ClevertapTemplatesListItem[] = []
     await Promise.allSettled(getTemplatePromises).then((promiseOutcome) => {
       promiseOutcome.forEach((promiseOutcome) => {
         if (isFulfilled(promiseOutcome)) {
+          globalLogger.info('Promise fulfilled for template type: %s', messageMedium)
           const templatesPerPage: ClevertapTemplatesListItem[] = promiseOutcome.value.templates
           templates.push(...templatesPerPage)
         } else {
+          globalLogger.info(
+            'Failed to fetch all the templates for template type: %s',
+            messageMedium,
+          )
           throw new CouldNotRetrieveTemplates({ messageMedium })
         }
       })
     })
-
+    globalLogger.info(
+      'Successfully fetched all the templates for template type from the getTemplates api: %s',
+      messageMedium,
+    )
     // Build item identifiers from the fetched templates
     return clevertapMapper.buildItemIdentifiersFromTemplates({
       templates,
@@ -186,6 +216,7 @@ export const getItems = async (
   items: CacheResponseBodyItems
   errors: ErrorInfo[]
 }> => {
+  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   let getItemsErrors: ErrorInfo[] = []
   let result: CacheResponseBodyItems = []
   const templateGroupsByTemplateType = groupItemsByTemplateType(items)
@@ -196,10 +227,18 @@ export const getItems = async (
     const templateRequests = templateIds.map((templateId) =>
       clevertapApiClient.getTemplateById({ accountId, passcode, templateId, templateType }),
     )
+    globalLogger.info(
+      'List of promise returned for all the templates for getTemplateById api for template type: %s',
+      templateType,
+    )
     const templatesSettledResult = await Promise.allSettled(templateRequests)
     const fulfilledTemplatesValue = templatesSettledResult
       .filter(isFulfilled)
       .map((fulfilledResult) => fulfilledResult.value)
+    globalLogger.info(
+      'Successfully fetched all the templates from the getTemplateById api for template type: %s',
+      templateType,
+    )
 
     const templateTypeErrors = templatesSettledResult.reduce<ErrorInfo[]>((acc, result, index) => {
       if (isRejected(result)) {
@@ -217,7 +256,10 @@ export const getItems = async (
       }
       return acc
     }, [] as ErrorInfo[])
-
+    globalLogger.info(
+      'Errors object created if any errors occurred for template type: %s',
+      templateType,
+    )
     getItemsErrors = [...getItemsErrors, ...templateTypeErrors]
 
     const itemResponses = getTemplateItemsByTemplateType({
@@ -225,10 +267,12 @@ export const getItems = async (
       templates: fulfilledTemplatesValue,
       items: templateGroupsByTemplateType[templateType],
     })
-
     result = result.concat(itemResponses.filter((i): i is CacheResponseBodyItem => i !== undefined))
+    globalLogger.info('Created response object for the template type: %s', templateType)
   }
-
+  globalLogger.info(
+    'Successfully fetched all the templates from the getTemplateById api for all template types',
+  )
   return { items: result, errors: getItemsErrors }
 }
 
@@ -271,6 +315,7 @@ export const getLocales = async (
   accountId: string,
   passcode: string,
 ): Promise<LocalesAvailable> => {
+  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   return {
     defaultLocale: 'en',
     locales: await clevertapApiClient.getLocales(accountId, passcode),
@@ -278,6 +323,7 @@ export const getLocales = async (
 }
 
 export const getCacheItemStructure = (): CacheItemStructure => {
+  globalLogger.info('Successful getCacheItemStructure call in env api')
   return {
     templateId: 'Template id',
     updated: 'Updated at',
@@ -296,6 +342,7 @@ export const getContent = async (
   items: ContentItem[]
   errors: ErrorInfoWithPerLocaleErrors[]
 }> => {
+  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   let result: ContentItem[] = []
   const templateGroups = groupItemsByTemplateType(items)
   let translateErrors: ErrorInfoWithPerLocaleErrors[] = []
@@ -314,10 +361,17 @@ export const getContent = async (
         clevertapApiClient.getTemplateById(payload),
       ),
     )
-
+    globalLogger.info(
+      'List of promise created to get actual translatable content from the templates using the getTemplateById api for template type: %s in getContent',
+      templateType,
+    )
     const fulfilledTemplatesValue = templatesSettledResult
       .filter(isFulfilled)
       .map((fulfilledResult) => fulfilledResult.value)
+    globalLogger.info(
+      'Successfully fetched all the templates from the getTemplateById api for template type: %s',
+      templateType,
+    )
 
     const templateTypeErrors = templatesSettledResult.reduce<ErrorInfoWithPerLocaleErrors[]>(
       (acc, result, index) => {
@@ -347,6 +401,10 @@ export const getContent = async (
       },
       [] as ErrorInfoWithPerLocaleErrors[],
     )
+    globalLogger.info(
+      'Errors object created if any errors occurred for template type: %s',
+      templateType,
+    )
 
     translateErrors = [...translateErrors, ...templateTypeErrors]
 
@@ -358,8 +416,11 @@ export const getContent = async (
     })
 
     result = result.concat(itemsWithTranslations)
+    globalLogger.info('Created response object for the template type: %s', templateType)
   }
-
+  globalLogger.info(
+    'Successfully fetched all the translatable content from the templates using the getTemplateById api for all template types',
+  )
   return {
     items: result,
     errors: translateErrors,

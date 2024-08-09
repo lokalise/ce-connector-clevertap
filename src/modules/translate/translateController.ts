@@ -11,6 +11,7 @@ export const getContent = async (
   const { translateService } = req.diScope.cradle
 
   try {
+    globalLogger.info('Fetching actual content of templates process started')
     const { items, errors } = await translateService.getContent(
       req.integrationConfig,
       req.authConfig,
