@@ -9,6 +9,7 @@ export async function getCache(req: FastifyRequest, reply: ListCacheResponse) {
   const { cacheService } = req.diScope.cradle
 
   try {
+    globalLogger.info('Getting cache list process started')
     const items = await cacheService.listItems(req.integrationConfig, req.authConfig)
     globalLogger.info(items, '/cache endpoint cache items result is: ')
     await reply.send({
@@ -30,6 +31,7 @@ export async function getCacheItems(
 ) {
   const { cacheService } = req.diScope.cradle
   try {
+    globalLogger.info('Getting cache list item process started')
     const { items, errors } = await cacheService.getItems(
       req.integrationConfig,
       req.authConfig,

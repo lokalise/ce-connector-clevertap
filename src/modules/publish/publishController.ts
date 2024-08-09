@@ -11,6 +11,7 @@ export const publishContent = async (
   const { publishService } = req.diScope.cradle
 
   try {
+    globalLogger.info('Publishing translated templates process started')
     const { errors } = await publishService.publishContent(
       req.integrationConfig,
       req.authConfig,
