@@ -5,9 +5,9 @@ pipeline {
 
   stages {
     stage('Triggers build on tag push') {
-      // when {
-      //   tag pattern: "\\d+", comparator: "REGEXP"
-      // }
+      when {
+        tag pattern: "\\d+", comparator: "REGEXP"
+      }
 
       steps {
         script {
@@ -21,7 +21,7 @@ pipeline {
             job: env.PROMOTE_JOB_NAME,
             wait: false,
             parameters: [
-              [$class: 'StringParameterValue', name: 'TAG', value: "7"],
+              [$class: 'StringParameterValue', name: 'TAG', value: "${env.TAG}"],
               [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
             ]
           )
