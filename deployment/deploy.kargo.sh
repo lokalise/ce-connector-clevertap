@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR" || :
 
 COMPOSE_FILE=docker-compose.kargo.yml
 export COMPOSE_FILE
-PROJECT=$(git config --get remote.origin.url | cut -d"/" -f2 | sed 's/\.git$//')
+PROJECT=$(git config --get remote.origin.url | awk -F/ '{print $NF}' | sed 's/\.git$//')
 export PROJECT
 
 docker-compose pull
