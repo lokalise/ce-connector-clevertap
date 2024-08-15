@@ -3,7 +3,7 @@
 [ -z "${TAG}" ] && echo "No tag specified" && exit 1
 [ -z "${GIT_COMMIT}" ] && echo "No GIT_COMMIT specified" && exit 1
 
-PROJECT=$(git config --get remote.origin.url | cut -d"/" -f2 | sed 's/\.git$//')
+PROJECT=$(git config --get remote.origin.url | awk -F/ '{print $NF}' | sed 's/\.git$//')
 SERVICE="app"
 
 DOCKER_BUILDKIT=1 docker build -f Dockerfile \
