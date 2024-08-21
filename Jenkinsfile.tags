@@ -12,17 +12,12 @@ pipeline {
       when {
         tag pattern: "\\d+", comparator: "REGEXP"
       }
-
       steps {
         sh 'echo ${TAG}'
-        build(
-          job: 'cteng/conn-clevertap/promote',
-          wait: false,
-          parameters: [
-            [$class: 'StringParameterValue', name: 'TAG', value: "${TAG}"],
-            [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
+        build job: '../promote', wait: false, parameters: [
+          [$class: 'StringParameterValue', name: 'TAG', value: "${TAG}"],
+          [$class: 'StringParameterValue', name: 'ENV', value: "stage"],
           ]
-        )
       }
     }
   }
