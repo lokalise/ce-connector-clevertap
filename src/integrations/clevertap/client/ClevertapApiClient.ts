@@ -179,12 +179,7 @@ export class ClevertapApiClient extends APIAbstract {
   }
 
   public getLocales(accountId: string, passcode: string): Promise<Awaited<LocaleDefinition[]>> {
-    const locales: LocaleDefinition[] = [
-      {
-        code: 'en',
-        name: 'English',
-      },
-    ]
+    const locales: LocaleDefinition[] = []
     return Promise.resolve(locales)
   }
 }

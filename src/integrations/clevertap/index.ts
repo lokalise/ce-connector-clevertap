@@ -37,6 +37,7 @@ export const publishContent = async (
   errors: ErrorInfoWithPerLocaleErrors[]
 }> => {
   globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
+  globalLogger.info({ items }, 'Content items in publish request: ')
   const publishErrors: ErrorInfoWithPerLocaleErrors[] = []
   const baseTemplateIds = [...new Set(items.map((item) => item.groupId))]
   const updateTemplatesRequests = baseTemplateIds.map(async (baseTemplateId) => {
@@ -317,7 +318,7 @@ export const getLocales = async (
 ): Promise<LocalesAvailable> => {
   globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
   return {
-    defaultLocale: 'en',
+    defaultLocale: 'base',
     locales: await clevertapApiClient.getLocales(accountId, passcode),
   }
 }
@@ -342,7 +343,9 @@ export const getContent = async (
   items: ContentItem[]
   errors: ErrorInfoWithPerLocaleErrors[]
 }> => {
-  globalLogger.info('accountId: %s, passcode: %s ', accountId, passcode)
+  globalLogger.info('accountId: %s, passcode: %s locales: %s', accountId, passcode)
+  globalLogger.info({ locales }, 'locales in translate request: ')
+  globalLogger.info({ items }, 'item identifiers in translate request: ')
   let result: ContentItem[] = []
   const templateGroups = groupItemsByTemplateType(items)
   let translateErrors: ErrorInfoWithPerLocaleErrors[] = []
