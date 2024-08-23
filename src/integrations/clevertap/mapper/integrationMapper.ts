@@ -263,8 +263,7 @@ const buildItemWithTranslations = ({
         const template = translatableTemplates.find(
           (translatableTemplate) =>
             translatableTemplate?.templateId === Number(item.groupId) &&
-            ((translatableTemplate?.locale === undefined && locale === 'en') ||
-              translatableTemplate.locale === locale),
+            (translatableTemplate?.locale === undefined || translatableTemplate.locale === locale),
         )
         return {
           ...acc,
@@ -287,8 +286,8 @@ const getTemplateFieldValue = ({
   templateType,
 }: TemplateFieldValueParams) => {
   if ((templateType as MessageMediumTypes) === MessageMediumTypes.Email) {
-    if(contentType === "html") {
-      contentType = "body"
+    if (contentType === 'html') {
+      contentType = 'body'
     }
     const value =
       template.templateData[contentType as keyof typeof template.templateData] ??
