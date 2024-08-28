@@ -15,13 +15,13 @@ export type CacheResponseBodyItemField = {
 
 export enum EmailContentTypes {
   Subject = 'subject',
-  PreheaderText = 'preheaderText',
+  PreheaderText = 'preheader',
   Html = 'html',
 }
 
 export enum EmailContentTitles {
   subject = 'Subject',
-  preheaderText = 'Preheader text',
+  preheader = 'Preheader text',
   html = 'Html',
 }
 

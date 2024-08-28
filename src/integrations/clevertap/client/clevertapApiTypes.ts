@@ -50,8 +50,9 @@ export type ClevertapEmailTemplate = {
       fromEmail?: string
       replyToName?: string
       replyToEmail?: string
-      subject: string
-      preheader: string
+      subject?: string
+      plainText?: string
+      preheader?: string
       ccEmails?: string[]
       bccEmails?: string[]
       annotationMeta?: string

@@ -13,6 +13,7 @@ export class TranslateService extends DynamicHostService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     defaultLocale: string,
   ) {
+    globalLogger.info(defaultLocale, 'Value of defaultLocale in translate call is: ')
     globalLogger.info('Setting region for region %s', auth.region as string)
     this.setApiHost(config)
     globalLogger.info('Region is set successfully')
