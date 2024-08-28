@@ -15,6 +15,7 @@ export class PublishService extends DynamicHostService {
   ): Promise<{
     errors: ErrorInfoWithPerLocaleErrors[]
   }> {
+    globalLogger.info(defaultLocale, 'Value of defaultLocale in publish call is: ')
     globalLogger.info('Setting region for region %s', auth.region as string)
     this.setApiHost(config)
     globalLogger.info('Region is set successfully')

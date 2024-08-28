@@ -343,7 +343,7 @@ export const getContent = async (
   items: ContentItem[]
   errors: ErrorInfoWithPerLocaleErrors[]
 }> => {
-  globalLogger.info('accountId: %s, passcode: %s locales: %s', accountId, passcode)
+  globalLogger.info('accountId: %s, passcode: %s', accountId, passcode)
   globalLogger.info({ locales }, 'locales in translate request: ')
   globalLogger.info({ items }, 'item identifiers in translate request: ')
   let result: ContentItem[] = []
