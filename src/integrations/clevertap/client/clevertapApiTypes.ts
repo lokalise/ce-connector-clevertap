@@ -45,6 +45,7 @@ export type ClevertapEmailTemplate = {
   templateData: {
     subType?: string
     body: string
+    ampBody?: string
     senderDetail?: {
       fromName?: string
       fromEmail?: string

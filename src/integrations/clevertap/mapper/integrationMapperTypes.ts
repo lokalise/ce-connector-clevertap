@@ -17,12 +17,18 @@ export enum EmailContentTypes {
   Subject = 'subject',
   PreheaderText = 'preheader',
   Html = 'html',
+  AmpHtml = 'ampHtml',
+  PlainText = 'plainText',
+  AnnotationMeta = 'annotationMeta',
 }
 
 export enum EmailContentTitles {
   subject = 'Subject',
   preheader = 'Preheader text',
   html = 'Html',
+  ampHtml = 'Amp Html',
+  plainText = 'Plain Text',
+  annotationMeta = 'Annotation Data',
 }
 
 export type ItemIdentifiersFromTemplates = {
