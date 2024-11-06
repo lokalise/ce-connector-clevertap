@@ -76,7 +76,6 @@ const buildItemIdentifierWithTemplate = (
     replyToEmail: template.templateData?.senderDetail?.replyToEmail,
     ccEmails: template.templateData?.senderDetail?.ccEmails,
     bccEmails: template.templateData?.senderDetail?.bccEmails,
-    annotationMeta: template.templateData?.senderDetail?.annotationMeta,
     labels: template.labels,
     createdAt: template.createdAt,
     createdBy: template.createdBy,
@@ -100,6 +99,13 @@ const buildItemIdentifierForEmail = (id: string) => [
   buildItemIdentifierWithContentType(id, EmailContentTypes.Subject, MessageMediumTypes.Email),
   buildItemIdentifierWithContentType(id, EmailContentTypes.PreheaderText, MessageMediumTypes.Email),
   buildItemIdentifierWithContentType(id, EmailContentTypes.Html, MessageMediumTypes.Email),
+  buildItemIdentifierWithContentType(id, EmailContentTypes.AmpHtml, MessageMediumTypes.Email),
+  buildItemIdentifierWithContentType(id, EmailContentTypes.PlainText, MessageMediumTypes.Email),
+  buildItemIdentifierWithContentType(
+    id,
+    EmailContentTypes.AnnotationMeta,
+    MessageMediumTypes.Email,
+  ),
 ]
 
 const buildCacheItemsFromTemplate = ({
@@ -177,6 +183,15 @@ const buildUpdateTemplateBodiesForEmail = ({
     EmailContentTypes.PreheaderText,
   )
   const htmlTranslates = getTranslations(templateTranslatableItems, EmailContentTypes.Html)
+  const ampHtmlTranslates = getTranslations(templateTranslatableItems, EmailContentTypes.AmpHtml)
+  const plainTextTranslates = getTranslations(
+    templateTranslatableItems,
+    EmailContentTypes.PlainText,
+  )
+  const annotationMetaTranslates = getTranslations(
+    templateTranslatableItems,
+    EmailContentTypes.AnnotationMeta,
+  )
   const metadata = templateTranslatableItems[0].metadata
   const templateName = generateChildTemplateName(
     metadata.templateName as string,
@@ -186,27 +201,29 @@ const buildUpdateTemplateBodiesForEmail = ({
     baseTemplateId: Number(baseTemplateId),
     locale: language,
     templateName: templateName[language],
-    description: (metadata.description as string) ?? null,
-    path: (metadata.path as string) ?? null,
+    description: metadata.description as string | undefined,
+    path: metadata.path as string | undefined,
     templateData: {
-      subType: (metadata.subType as string) ?? null,
+      subType: metadata.subType as string | undefined,
       body: htmlTranslates?.[language] ?? '',
+      ampBody: ampHtmlTranslates?.[language] ?? undefined,
       senderDetail: {
-        fromName: (metadata.fromName as string) ?? null,
-        fromEmail: (metadata.fromEmail as string) ?? null,
-        replyToName: (metadata.replyToName as string) ?? null,
-        replyToEmail: (metadata.replyToName as string) ?? null,
+        fromName: metadata.fromName as string | undefined,
+        fromEmail: metadata.fromEmail as string | undefined,
+        replyToName: metadata.replyToName as string | undefined,
+        replyToEmail: metadata.replyToEmail as string | undefined,
         subject: subjectTranslates?.[language] ?? '',
-        preheader: preheaderTextTranslates?.[language] ?? '',
-        ccEmails: (metadata.ccEmails as string[]) ?? null,
-        bccEmails: (metadata.bccEmail as string[]) ?? null,
-        annotationMeta: (metadata.annotationMeta as string) ?? null,
+        plainText: plainTextTranslates?.[language] ?? undefined,
+        preheader: preheaderTextTranslates?.[language] ?? undefined,
+        ccEmails: metadata.ccEmails as string[] | undefined,
+        bccEmails: metadata.bccEmail as string[] | undefined,
+        annotationMeta: annotationMetaTranslates?.[language] ?? undefined,
       },
     },
-    labels: (metadata.labels as string) ?? null,
-    partner: 'Lokalise',
-    createdBy: 'Lokalise',
-    updatedBy: 'Lokalise',
+    labels: metadata.labels as string | undefined,
+    partner: 'lokalise@clevertap.com',
+    createdBy: 'lokalise@clevertap.com',
+    updatedBy: 'lokalise@clevertap.com',
   }))
 }
 
@@ -288,6 +305,9 @@ const getTemplateFieldValue = ({
   if ((templateType as MessageMediumTypes) === MessageMediumTypes.Email) {
     if (contentType === 'html') {
       contentType = 'body'
+    }
+    if (contentType === 'ampHtml') {
+      contentType = 'ampBody'
     }
     const value =
       template.templateData[contentType as keyof typeof template.templateData] ??
