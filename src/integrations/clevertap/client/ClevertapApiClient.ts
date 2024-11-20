@@ -16,6 +16,7 @@ import {
   LocaleDefinition,
   SuccessMessageResponse,
   UpdateEmailTemplateRequestBody,
+  UpdateContentBlockeRequestBody,
   UpdateTemplateParams,
 } from '../types'
 import { globalLogger } from '../../../infrastructure/errors/globalErrorHandler'
@@ -95,6 +96,8 @@ export class ClevertapApiClient extends APIAbstract {
     switch (messageMedium as MessageMediumTypes) {
       case MessageMediumTypes.Email:
         return this.getEmailTemplates(accountId, passcode, pageNumber, pageSize)
+      case MessageMediumTypes.ContentBlock:
+        return this.getEmailTemplates(accountId, passcode, pageNumber, pageSize)
       default:
         throw new Error('Wrong content type')
     }
@@ -117,6 +120,26 @@ export class ClevertapApiClient extends APIAbstract {
         pageSize,
       },
       requestLabel: 'getEmailTemplate',
+    })
+  }
+
+  public async getContentBlocks(
+    accountId: string,
+    passcode: string,
+    pageNumber: number,
+    pageSize: number,
+  ) {
+    return this.get<ClevertapTemplatesList>('/v1/contentBlock/localise/list', {
+      headers: {
+        'X-CleverTap-Account-Id': accountId,
+        'X-CleverTap-Passcode': passcode,
+        'content-type': 'application/json',
+      },
+      query: {
+        pageNumber,
+        pageSize,
+      },
+      requestLabel: 'getContentBlock',
     })
   }
 
@@ -157,6 +180,8 @@ export class ClevertapApiClient extends APIAbstract {
     switch (templateType as MessageMediumTypes) {
       case MessageMediumTypes.Email:
         return this.updateEmailTemplate(accountId, passcode, updateTemplatePayload)
+      case MessageMediumTypes.ContentBlock:
+        return this.updateEmailTemplate(accountId, passcode, updateTemplatePayload)
       default:
         throw new Error('Unsupported template type')
     }
@@ -174,6 +199,22 @@ export class ClevertapApiClient extends APIAbstract {
         'content-type': 'application/json',
       },
       body: updateTemplatePayload,
+      requestLabel: 'updateEmailTemplate',
+    })
+  }
+
+  public async updateContentBlocks(
+    accountId: string,
+    passcode: string,
+    updateContentBlockPayload: UpdateContentBlockeRequestBody,
+  ) {
+    return this.post<SuccessMessageResponse>('/v1/contentBlock/localise/upsert', {
+      headers: {
+        'X-CleverTap-Account-Id': accountId,
+        'X-CleverTap-Passcode': passcode,
+        'content-type': 'application/json',
+      },
+      body: updateContentBlockPayload,
       requestLabel: 'updateEmailTemplate',
     })
   }

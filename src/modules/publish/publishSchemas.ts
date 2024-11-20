@@ -21,4 +21,18 @@ export const publishResponseBody = z.object({
     .optional(),
 })
 
+export const cmsPublishResponseBody = z.object({
+  statusCode: z.number(),
+  message: z.string().optional(),
+  payload: z
+    .object({
+      html: z.string(),
+      repalcements: z.string(),
+      text: z.object({
+        errors: z.array(z.object({}).passthrough()),
+      }),
+    })
+    .optional(),
+})
+
 export type PublishRequestBodyType = z.infer<typeof publishRequestBody>

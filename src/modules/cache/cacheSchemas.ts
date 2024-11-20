@@ -29,3 +29,17 @@ export const cacheResponseBody = z.object({
 export const cacheRequestBody = z.object({
   items: z.array(itemIdentifiers),
 })
+
+export const cmsCacheResponseBody = z.object({
+  statusCode: z.number().optional(),
+  items: z.array(cacheItem),
+  payload: z
+    .object({
+      html: z.string(),
+      replacemrnts: z.string(),
+      text: z.object({
+        errors: z.array(z.object({}).passthrough()),
+      }),
+    })
+    .optional(),
+})

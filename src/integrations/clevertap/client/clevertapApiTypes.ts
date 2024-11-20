@@ -16,6 +16,7 @@ export type ClevertapAuthorizationApiResponse = {
 
 export enum MessageMediumTypes {
   Email = 'Email',
+  ContentBlock = 'ContentBlock',
 }
 
 export type ClevertapTemplatesList = {
@@ -25,9 +26,28 @@ export type ClevertapTemplatesList = {
   pageSize: number
 }
 
+export type ClevertapContentBlockList = {
+  contentBlock: ClevertapContentBlockItem[]
+  total: number
+  pageNumber: number
+  pageSize: number
+}
+
 export type ClevertapTemplatesListItem = {
   templateId: number
   templateName: string
+  subType: string
+  path: string
+  createdBy: string
+  createdAt: number
+  updatedBy?: string
+  updatedAt?: string
+  labels?: string[]
+}
+
+export type ClevertapContentBlockItem = {
+  contentBlockId: number
+  contentBlockName: string
   subType: string
   path: string
   createdBy: string

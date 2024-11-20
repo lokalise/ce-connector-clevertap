@@ -12,6 +12,11 @@ export type UpdateEmailTemplateRequestBody = Partial<ClevertapEmailTemplate> & {
   locale: string
 }
 
+export type UpdateContentBlockRequestBody = Partial<ClevertapEmailTemplate> & {
+  baseContentBlockId: number
+  locale: string
+}
+
 export type UpdateTemplateParams = {
   accountId: string
   passcode: string

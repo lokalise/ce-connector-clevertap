@@ -22,4 +22,18 @@ export const translateResponseBody = z.object({
     .optional(),
 })
 
+export const cmsTranslateResponseBody = z.object({
+  statusCode: z.number().optional(),
+  items: z.array(contentItem),
+  payload: z
+    .object({
+      html: z.string(),
+      replacements: z.string(),
+      text: z.object({
+        errors: z.array(z.object({}).passthrough()),
+      }),
+    })
+    .optional(),
+})
+
 export type TranslateRequestBodyType = z.infer<typeof translateRequestBody>
