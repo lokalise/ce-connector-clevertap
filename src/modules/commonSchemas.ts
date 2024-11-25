@@ -18,6 +18,11 @@ export const apiError = z.object({
   details: z.object({}).passthrough(),
 })
 
+export const contentBlockApiError = z.object({
+  message: z.string(),
+  errorCode: z.string(),
+})
+
 export const integrationConfig = z.object({}).passthrough()
 
 export const authConfig = z.object({}).passthrough()
