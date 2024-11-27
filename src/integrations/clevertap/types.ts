@@ -57,6 +57,12 @@ export type TemplateItemsByTemplateTypeParams = {
   items: ItemIdentifiers[]
 }
 
+export type ContentBlockItemsByTemplateTypeParams = {
+  templateType: string
+  templates: ClevertapEmailTemplate[]
+  items: ItemIdentifiers[]
+}
+
 export type TranslatableTemplatesParams = {
   templateIds: string[]
   locales: string[]
