@@ -16,7 +16,7 @@ import {
   LocaleDefinition,
   SuccessMessageResponse,
   UpdateEmailTemplateRequestBody,
-  UpdateContentBlockeRequestBody,
+  UpdateContentBlockRequestBody,
   UpdateTemplateParams,
 } from '../types'
 import { globalLogger } from '../../../infrastructure/errors/globalErrorHandler'
@@ -97,7 +97,7 @@ export class ClevertapApiClient extends APIAbstract {
       case MessageMediumTypes.Email:
         return this.getEmailTemplates(accountId, passcode, pageNumber, pageSize)
       case MessageMediumTypes.ContentBlock:
-        return this.getContentBlocks()
+        return this.getContentBlocks(accountId, passcode, pageNumber, pageSize)
       default:
         throw new Error('Wrong content type')
     }
@@ -174,7 +174,7 @@ export class ClevertapApiClient extends APIAbstract {
   }
 
   public getContentBlockById({ accountId, passcode, templateId }: getTemplateByIdParams) {
-    return this.get<ClevertapEmailTemplate>('v1/contentBlock/localise/list', {
+    return this.get<ClevertapEmailTemplate>('/v1/contentBlock/localise/list', {
       headers: {
         'X-CleverTap-Account-Id': accountId,
         'X-CleverTap-Passcode': passcode,
@@ -233,7 +233,7 @@ export class ClevertapApiClient extends APIAbstract {
   public async updateContentBlocks(
     accountId: string,
     passcode: string,
-    updateContentBlockPayload: UpdateContentBlockeRequestBody,
+    updateContentBlockPayload: UpdateContentBlockRequestBody,
   ) {
     return this.post<SuccessMessageResponse>('/v1/contentBlock/localise/upsert', {
       headers: {

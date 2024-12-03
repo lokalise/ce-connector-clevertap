@@ -64,10 +64,3 @@ export async function getCacheItems(
     })
   }
 }
-
-const { items, errors } = await cacheService.getItems(
-  labelsList: [
-    { _id: '1223244343244', name: 'CMS' },
-  ],
-  editorType: 'Text',
-}
