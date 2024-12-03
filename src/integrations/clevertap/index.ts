@@ -23,7 +23,7 @@ import {
   ContentBlockItemsByTemplateTypeParams,
   LocalesAvailable,
   TemplateItemsByTemplateTypeParams,
-  TranslatableTemplatesParams,
+  TranslatableTemplatesParams, UpdateTemplateParams,
 } from './types'
 import {
   ErrorInfo,
@@ -68,7 +68,7 @@ export const publishContent = async (
     globalLogger.info('Translated templates are ready to be exported')
     const updateSettledResult = await Promise.allSettled(
       updateTemplatePayloads.map((updateTemplatePayload) =>
-        clevertapApiClient.updateTemplate({
+        clevertapApiClient.updateTemplate(<UpdateTemplateParams>{
           accountId,
           passcode,
           updateTemplatePayload,
@@ -297,11 +297,7 @@ export const getTemplateItemsByTemplateType = ({
   | TemplateItemsByTemplateTypeParams
   | ContentBlockItemsByTemplateTypeParams): CacheResponseBodyItem[] => {
   return templates.flatMap((template) => {
-    const contentTypes = getContentTypesByGroupId(
-      items,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      template?.templateId?.toString() || template?.id?.toString(),
-    )
+    const contentTypes = getContentTypesByGroupId(items, template.templateId?.toString() || template.id?.toString())
     if (templateType === 'Email') {
       return clevertapMapper.buildCacheItemsFromTemplate({ template, templateType, contentTypes })
     }
@@ -309,7 +305,7 @@ export const getTemplateItemsByTemplateType = ({
   })
 }
 
-export const getContentTypesByGroupId = (items: ItemIdentifiers[], groupId: any) =>
+export const getContentTypesByGroupId = (items: ItemIdentifiers[], groupId: string | undefined) =>
   [
     ...new Set(
       items.map((item) => {

@@ -8,13 +8,10 @@ type ExtendedIncomingHttpHeaders = IncomingHttpHeaders & {
 }
 
 export type UpdateEmailTemplateRequestBody = Partial<ClevertapEmailTemplate> & {
-  baseTemplateId: number
-  locale: string
-}
-
-export type UpdateContentBlockRequestBody = Partial<ClevertapEmailTemplate> & {
-  baseContentBlockId: number
-  locale: string
+  baseTemplateId?: number
+  pid?: number
+  locale?: string
+  replacements?: string
 }
 
 export type UpdateTemplateParams = {
@@ -33,9 +30,10 @@ export type ApiRequest = {
 }
 
 export type SuccessMessageResponse = {
-  msg: string
-  baseTemplateId: number
-  locale: string
+  msg?: string
+  message?: string
+  baseTemplateId?: number
+  locale?: string
   status: string
 }
 

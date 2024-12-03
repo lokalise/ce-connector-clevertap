@@ -251,9 +251,31 @@ const buildUpdateTemplateRequestBodies = ({
         templateTranslatableItems,
         availableLanguages,
       })
+    case MessageMediumTypes.ContentBlock:
+      return buildUpdateTemplateBodiesForContentBlock({
+        baseTemplateId,
+        templateTranslatableItems,
+        availableLanguages,
+      })
     default:
       throw new Error('Unsupported template type')
   }
+}
+
+const buildUpdateTemplateBodiesForContentBlock = ({
+  baseTemplateId,
+  templateTranslatableItems,
+  availableLanguages,
+}: EmailTemplateRequestBodiesForUpdatingParams): UpdateEmailTemplateRequestBody[] => {
+  const contentTranslates = getTranslations(
+    templateTranslatableItems,
+    ContentBlockContentTypes.Content,
+  )
+  return availableLanguages.map((language) => ({
+    pid: Number(baseTemplateId),
+    locale: language,
+    replacements: contentTranslates?.[language] ?? '',
+  }))
 }
 
 const buildUpdateTemplateBodiesForEmail = ({
@@ -313,7 +335,7 @@ const buildUpdateTemplateBodiesForEmail = ({
 
 const getTranslations = (
   templateTranslatableItems: ContentItem[],
-  contentType: EmailContentTypes,
+  contentType: EmailContentTypes | ContentBlockContentTypes,
 ): Record<string, string> | undefined => {
   return templateTranslatableItems.find((item) => item.metadata.contentType === contentType)
     ?.translations
