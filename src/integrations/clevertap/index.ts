@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   AuthFailedError,
   CouldNotRetrieveTemplates,
@@ -5,6 +7,7 @@ import {
 import { AuthConfig, ContentItem, isFulfilled, isRejected, ItemIdentifiers } from '../../types'
 import { ClevertapApiClient } from './client/ClevertapApiClient'
 import {
+  ClevertapContentBlockListItem,
   type ClevertapTemplatesList,
   ClevertapTemplatesListItem,
   MessageMediumTypes,
@@ -17,6 +20,7 @@ import clevertapMapper, {
 } from './mapper/integrationMapper'
 import {
   CacheItemStructure,
+  ContentBlockItemsByTemplateTypeParams,
   LocalesAvailable,
   TemplateItemsByTemplateTypeParams,
   TranslatableTemplatesParams,
@@ -176,12 +180,13 @@ export const listItems = async (
       'List of promise returned for all the templates for getTemplates api for template type: %s',
       messageMedium,
     )
-    const templates: ClevertapTemplatesListItem[] = []
+    const templates: ClevertapTemplatesListItem[] | ClevertapContentBlockListItem[] = []
     await Promise.allSettled(getTemplatePromises).then((promiseOutcome) => {
       promiseOutcome.forEach((promiseOutcome) => {
         if (isFulfilled(promiseOutcome)) {
           globalLogger.info('Promise fulfilled for template type: %s', messageMedium)
-          const templatesPerPage: ClevertapTemplatesListItem[] = promiseOutcome.value.templates
+          const templatesPerPage: ClevertapTemplatesListItem[] | ClevertapContentBlockListItem[] =
+            promiseOutcome.value?.templates || promiseOutcome.value?.contentBlocks || []
           templates.push(...templatesPerPage)
         } else {
           globalLogger.info(
@@ -197,10 +202,17 @@ export const listItems = async (
       messageMedium,
     )
     // Build item identifiers from the fetched templates
-    return clevertapMapper.buildItemIdentifiersFromTemplates({
-      templates,
-      objectType: MessageMediumTypes[messageMedium],
-    })
+    if (messageMedium === MessageMediumTypes.Email) {
+      return clevertapMapper.buildItemIdentifiersFromTemplates({
+        templates,
+        objectType: MessageMediumTypes[messageMedium],
+      })
+    } else {
+      return clevertapMapper.buildItemIdentifiersFromContentBlocks({
+        templates,
+        objectType: MessageMediumTypes[messageMedium],
+      })
+    }
   })
 
   // Wait for all promises to resolve and flatten the results
@@ -281,14 +293,23 @@ export const getTemplateItemsByTemplateType = ({
   templateType,
   templates,
   items,
-}: TemplateItemsByTemplateTypeParams): CacheResponseBodyItem[] => {
+}:
+  | TemplateItemsByTemplateTypeParams
+  | ContentBlockItemsByTemplateTypeParams): CacheResponseBodyItem[] => {
   return templates.flatMap((template) => {
-    const contentTypes = getContentTypesByGroupId(items, template.templateId.toString())
-    return clevertapMapper.buildCacheItemsFromTemplate({ template, templateType, contentTypes })
+    const contentTypes = getContentTypesByGroupId(
+      items,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      template?.templateId?.toString() || template?.id?.toString(),
+    )
+    if (templateType === 'Email') {
+      return clevertapMapper.buildCacheItemsFromTemplate({ template, templateType, contentTypes })
+    }
+    return clevertapMapper.buildCacheItemsFromContentBlock({ template, templateType, contentTypes })
   })
 }
 
-export const getContentTypesByGroupId = (items: ItemIdentifiers[], groupId: string) =>
+export const getContentTypesByGroupId = (items: ItemIdentifiers[], groupId: any) =>
   [
     ...new Set(
       items.map((item) => {

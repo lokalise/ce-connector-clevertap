@@ -20,7 +20,8 @@ export enum MessageMediumTypes {
 }
 
 export type ClevertapTemplatesList = {
-  templates: ClevertapTemplatesListItem[]
+  templates?: ClevertapTemplatesListItem[]
+  contentBlocks?: ClevertapContentBlockListItem[]
   total: number
   pageNumber: number
   pageSize: number
@@ -34,10 +35,10 @@ export type ClevertapContentBlockList = {
 }
 
 export type ClevertapTemplatesListItem = {
-  templateId: number
-  templateName: string
-  subType: string
-  path: string
+  templateId?: number
+  templateName?: string
+  subType?: string
+  path?: string
   createdBy: string
   createdAt: number
   updatedBy?: string
@@ -57,12 +58,23 @@ export type ClevertapContentBlockItem = {
   labels?: string[]
 }
 
+export type ClevertapContentBlockListItem = {
+  id?: number
+  name?: string
+  type?: string
+  createdBy: string
+  createdAt: number
+  updatedBy?: string
+  updatedAt?: string
+  content?: string
+}
+
 export type ClevertapEmailTemplate = {
-  templateId: number
-  templateName: string
+  templateId?: number
+  templateName?: string
   description?: string
   path?: string
-  templateData: {
+  templateData?: {
     subType?: string
     body: string
     ampBody?: string
@@ -86,9 +98,33 @@ export type ClevertapEmailTemplate = {
   updatedBy?: string
   partner?: string
   locale?: string
+  id?: number
+  name?: string
+  content?: string
+  type?: string
 }
 
+// export type ClevertapContentBlock = {
+//   templateId?: number
+//   templateName?: string
+//   id?: number
+//   name?: string
+//   type?: string
+//   createdBy: string
+//   createdAt: number
+//   updatedBy?: string
+//   updatedAt?: string
+//   content?: string
+//   locale?: string
+// }
+
 export type CacheItemsFromTemplateParams = {
+  template: ClevertapEmailTemplate
+  templateType: string
+  contentTypes: string[]
+}
+
+export type CacheItemsFromContentBlockParams = {
   template: ClevertapEmailTemplate
   templateType: string
   contentTypes: string[]

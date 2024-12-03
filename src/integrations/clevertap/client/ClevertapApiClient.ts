@@ -97,7 +97,7 @@ export class ClevertapApiClient extends APIAbstract {
       case MessageMediumTypes.Email:
         return this.getEmailTemplates(accountId, passcode, pageNumber, pageSize)
       case MessageMediumTypes.ContentBlock:
-        return this.getEmailTemplates(accountId, passcode, pageNumber, pageSize)
+        return this.getContentBlocks()
       default:
         throw new Error('Wrong content type')
     }
@@ -152,6 +152,8 @@ export class ClevertapApiClient extends APIAbstract {
     switch (templateType as MessageMediumTypes) {
       case MessageMediumTypes.Email:
         return this.getEmailTemplateById({ accountId, passcode, templateId })
+      case MessageMediumTypes.ContentBlock:
+        return this.getContentBlockById({ accountId, passcode, templateId })
       default:
         throw new Error('Unsupported template type')
     }
@@ -169,6 +171,31 @@ export class ClevertapApiClient extends APIAbstract {
       },
       requestLabel: 'getEmailTemplateById',
     })
+  }
+
+  public getContentBlockById({ accountId, passcode, templateId }: getTemplateByIdParams) {
+    return this.get<ClevertapEmailTemplate>('v1/contentBlock/localise/list', {
+      headers: {
+        'X-CleverTap-Account-Id': accountId,
+        'X-CleverTap-Passcode': passcode,
+        'content-type': 'application/json',
+      },
+      query: {
+        templateId,
+      },
+      requestLabel: 'getEmailTemplateById',
+    })
+    // const aj: ClevertapEmailTemplate = {
+    //   id: 172226174968871,
+    //   name: '#@$@432234567890',
+    //   type: 'Text',
+    //   content: '{% for %} Hello how are you {% endfor %}',
+    //   createdAt: '20245555555',
+    //   createdBy: 'priti.mandal@clevertap.com',
+    //   updatedAt: '2024-08-08T16:23:44.000Z',
+    //   updatedBy: 'priti.mandal@clevertap.com',
+    // }
+    // return aj
   }
 
   public async updateTemplate({

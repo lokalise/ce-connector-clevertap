@@ -4,14 +4,18 @@ import {
   CacheResponseBodyItem,
   CacheResponseBodyItemField,
   EmailContentTitles,
+  ContentBlockTitles,
   EmailContentTypes,
   EmailTemplateRequestBodiesForUpdatingParams,
+  ItemIdentifiersFromContentBlocks,
   ItemIdentifiersFromTemplates,
   ItemWithTranslations,
   TemplateFieldValueParams,
   TemplateRequestBodiesForUpdatingParams,
+  ContentBlockContentTypes,
 } from './integrationMapperTypes'
 import {
+  CacheItemsFromContentBlockParams,
   CacheItemsFromTemplateParams,
   ClevertapEmailTemplate,
   isErrorResponse,
@@ -39,10 +43,25 @@ const buildItemIdentifiersFromTemplates = ({
   objectType,
 }: ItemIdentifiersFromTemplates): ItemIdentifiers[] => {
   return templates.flatMap((template) => {
-    const templateId = template.templateId.toString()
+    const templateId = template.templateId?.toString() || ''
     switch (objectType as MessageMediumTypes) {
       case MessageMediumTypes.Email:
         return buildItemIdentifierForEmail(templateId)
+      default:
+        return []
+    }
+  })
+}
+
+const buildItemIdentifiersFromContentBlocks = ({
+  templates,
+  objectType,
+}: ItemIdentifiersFromContentBlocks): ItemIdentifiers[] => {
+  return templates.flatMap((contentBlock) => {
+    const id = contentBlock?.id?.toString() || ''
+    switch (objectType as MessageMediumTypes) {
+      case MessageMediumTypes.ContentBlock:
+        return buildItemIdentifierForContentBlock(id)
       default:
         return []
     }
@@ -68,28 +87,50 @@ const buildItemIdentifierWithTemplate = (
   metadata: {
     contentType,
     templateType,
-    templateName: template.templateName,
-    subType: template.templateData.subType,
-    fromName: template.templateData?.senderDetail?.fromName,
-    fromEmail: template.templateData?.senderDetail?.fromEmail,
-    replyToName: template.templateData?.senderDetail?.replyToName,
-    replyToEmail: template.templateData?.senderDetail?.replyToEmail,
-    ccEmails: template.templateData?.senderDetail?.ccEmails,
-    bccEmails: template.templateData?.senderDetail?.bccEmails,
-    labels: template.labels,
-    createdAt: template.createdAt,
-    createdBy: template.createdBy,
-    updatedAt: template.updatedAt,
-    updatedBy: template.updatedBy,
+    templateName: template?.templateName,
+    subType: template?.templateData?.subType,
+    fromName: template?.templateData?.senderDetail?.fromName,
+    fromEmail: template?.templateData?.senderDetail?.fromEmail,
+    replyToName: template?.templateData?.senderDetail?.replyToName,
+    replyToEmail: template?.templateData?.senderDetail?.replyToEmail,
+    ccEmails: template?.templateData?.senderDetail?.ccEmails,
+    bccEmails: template?.templateData?.senderDetail?.bccEmails,
+    labels: template?.labels,
+    createdAt: template?.createdAt,
+    createdBy: template?.createdBy,
+    updatedAt: template?.updatedAt,
+    updatedBy: template?.updatedBy,
   },
   uniqueId: buildUniqueId(templateId, contentType),
   groupId: templateId,
+})
+
+const buildItemIdentifierWithContentBlock = (
+  template: ClevertapEmailTemplate,
+  id: string,
+  contentType: string,
+  templateType: string,
+) => ({
+  metadata: {
+    contentType,
+    templateType,
+    templateName: template?.name,
+    content: template?.content,
+    createdAt: template?.createdAt,
+    createdBy: template?.createdBy,
+    updatedAt: template?.updatedAt,
+    updatedBy: template?.updatedBy,
+  },
+  uniqueId: buildUniqueId(id, contentType),
+  groupId: id,
 })
 
 const getSortOrder = (type: string): string[] => {
   switch (type as MessageMediumTypes) {
     case MessageMediumTypes.Email:
       return Object.values(EmailContentTypes).map((value) => value.toString())
+    case MessageMediumTypes.ContentBlock:
+      return Object.values(ContentBlockContentTypes).map((value) => value.toString())
     default:
       return []
   }
@@ -108,6 +149,14 @@ const buildItemIdentifierForEmail = (id: string) => [
   ),
 ]
 
+const buildItemIdentifierForContentBlock = (id: string) => [
+  buildItemIdentifierWithContentType(
+    id,
+    ContentBlockContentTypes.Content,
+    MessageMediumTypes.ContentBlock,
+  ),
+]
+
 const buildCacheItemsFromTemplate = ({
   template,
   templateType,
@@ -122,6 +171,20 @@ const buildCacheItemsFromTemplate = ({
   }
 }
 
+const buildCacheItemsFromContentBlock = ({
+  template,
+  templateType,
+  contentTypes,
+}: CacheItemsFromContentBlockParams): CacheResponseBodyItem[] => {
+  const sortOrder = getSortOrder(templateType)
+  switch (templateType as MessageMediumTypes) {
+    case MessageMediumTypes.ContentBlock:
+      return buildCacheItemsFromContent(contentTypes, template, sortOrder)
+    default:
+      throw new Error('Unsupported template type')
+  }
+}
+
 const buildCacheItemsFromEmailTemplate = (
   contentTypes: string[],
   template: ClevertapEmailTemplate,
@@ -131,13 +194,32 @@ const buildCacheItemsFromEmailTemplate = (
     .sort((a, b) => order.indexOf(a) - order.indexOf(b))
     .map((contentType) => ({
       fields: buildCacheItemFieldWithMetadata(template, MessageMediumTypes.Email),
-      groupTitle: template.templateName ?? '',
+      groupTitle: template?.templateName ?? '',
       title: EmailContentTitles[contentType as keyof typeof EmailContentTitles],
       ...buildItemIdentifierWithTemplate(
         template,
-        template.templateId.toString(),
+        template?.templateId?.toString() || '',
         contentType,
         MessageMediumTypes.Email,
+      ),
+    }))
+
+const buildCacheItemsFromContent = (
+  contentTypes: string[],
+  template: ClevertapEmailTemplate,
+  order: string[],
+): CacheResponseBodyItem[] =>
+  contentTypes
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+    .map((contentType) => ({
+      fields: buildCacheItemFieldWithMetadata(template, MessageMediumTypes.ContentBlock),
+      groupTitle: template?.name ?? '',
+      title: 'Content',
+      ...buildItemIdentifierWithContentBlock(
+        template,
+        template?.id?.toString() || '',
+        contentType,
+        MessageMediumTypes.ContentBlock,
       ),
     }))
 
@@ -145,7 +227,9 @@ const buildCacheItemFieldWithMetadata = (
   template: ClevertapEmailTemplate,
   templateType: MessageMediumTypes,
 ): CacheResponseBodyItemField => {
-  const { templateId, updatedAt, createdBy } = template
+  const { updatedAt, createdBy, id } = template
+  let { templateId } = template
+  templateId = templateId || id
   return {
     templateId,
     updated: formatDate(updatedAt),
@@ -279,7 +363,8 @@ const buildItemWithTranslations = ({
       const translations = locales.reduce((acc, locale) => {
         const template = translatableTemplates.find(
           (translatableTemplate) =>
-            translatableTemplate?.templateId === Number(item.groupId) &&
+            (translatableTemplate?.templateId || translatableTemplate?.id) ===
+              Number(item.groupId) &&
             (translatableTemplate?.locale === undefined || translatableTemplate.locale === locale),
         )
         return {
@@ -310,14 +395,15 @@ const getTemplateFieldValue = ({
       contentType = 'ampBody'
     }
     const value =
-      template.templateData[contentType as keyof typeof template.templateData] ??
-      template.templateData.senderDetail?.[
+      template?.templateData?.[contentType as keyof typeof template.templateData] ??
+      template?.templateData?.senderDetail?.[
         contentType as keyof typeof template.templateData.senderDetail
       ] ??
       ''
     return isObject(value) ? JSON.stringify(value) : String(value)
   }
-  throw new Error('Unsupported template type')
+  const contentValue = template?.content ?? ''
+  return isObject(contentValue) ? JSON.stringify(contentValue) : String(contentValue)
 }
 
 export const buildPerLocaleErrors = (
@@ -365,7 +451,9 @@ export const buildGetCacheErrors = (
 
 const clevertapMapper = {
   buildItemIdentifiersFromTemplates,
+  buildItemIdentifiersFromContentBlocks,
   buildCacheItemsFromTemplate,
+  buildCacheItemsFromContentBlock,
   buildUpdateTemplateRequestBodies,
   buildItemWithTranslations,
 }
