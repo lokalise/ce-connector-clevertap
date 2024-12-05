@@ -184,17 +184,6 @@ export class ClevertapApiClient extends APIAbstract {
       },
       requestLabel: 'getEmailTemplateById',
     })
-    // const aj: ClevertapEmailTemplate = {
-    //   id: 172226174968871,
-    //   name: '#@$@432234567890',
-    //   type: 'Text',
-    //   content: '{% for %} Hello how are you {% endfor %}',
-    //   createdAt: '20245555555',
-    //   createdBy: 'priti.mandal@clevertap.com',
-    //   updatedAt: '2024-08-08T16:23:44.000Z',
-    //   updatedBy: 'priti.mandal@clevertap.com',
-    // }
-    // return aj
   }
 
   public async updateTemplate({

@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { contentItem, itemIdentifiers } from '../commonSchemas'
+import { contentItem } from '../commonSchemas'
 
 export const publishRequestBody = z.object({
   items: z.array(contentItem),
@@ -15,20 +15,6 @@ export const publishResponseBody = z.object({
       message: z.string(),
       errorCode: z.string(),
       details: z.object({
-        errors: z.array(z.object({}).passthrough()),
-      }),
-    })
-    .optional(),
-})
-
-export const cmsPublishResponseBody = z.object({
-  statusCode: z.number(),
-  message: z.string().optional(),
-  payload: z
-    .object({
-      html: z.string(),
-      repalcements: z.string(),
-      text: z.object({
         errors: z.array(z.object({}).passthrough()),
       }),
     })
