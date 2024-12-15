@@ -1,16 +1,20 @@
-// TODO: fakeIntegration connector 3-rd party mapper types
-
-import { ClevertapEmailTemplate, ClevertapTemplatesListItem } from '../client/clevertapApiTypes'
-import { CacheResponseBody } from '../../../modules/cache/cacheTypes'
+import type { CacheResponseBody } from '../../../modules/cache/cacheTypes'
 import { ContentItem, ItemIdentifiers } from '../../../types'
+import type {
+  ClevertapContentBlockListItem,
+  ClevertapEmailTemplate,
+  ClevertapTemplatesListItem,
+} from '../client/clevertapApiTypes'
 
 export type CacheResponseBodyItems = CacheResponseBody['items']
 export type CacheResponseBodyItem = CacheResponseBodyItems[0]
 export type CacheResponseBodyItemField = {
-  templateId: number
+  templateId?: number
   updated?: string
   creator?: string
-  templateType: string
+  templateType?: string
+  id?: number
+  type?: string
 }
 
 export enum EmailContentTypes {
@@ -22,6 +26,10 @@ export enum EmailContentTypes {
   AnnotationMeta = 'annotationMeta',
 }
 
+export enum ContentBlockContentTypes {
+  Content = 'content',
+}
+
 export enum EmailContentTitles {
   subject = 'Subject',
   preheader = 'Preheader text',
@@ -31,8 +39,17 @@ export enum EmailContentTitles {
   annotationMeta = 'Annotation Data',
 }
 
+export enum ContentBlockTitles {
+  content = 'Content',
+}
+
 export type ItemIdentifiersFromTemplates = {
   templates: ClevertapTemplatesListItem[]
+  objectType: string
+}
+
+export type ItemIdentifiersFromContentBlocks = {
+  templates: ClevertapContentBlockListItem[]
   objectType: string
 }
 
@@ -52,7 +69,7 @@ export type TemplateRequestBodiesForUpdatingParams = {
 export type ItemWithTranslations = {
   items: ItemIdentifiers[]
   locales: string[]
-  translatableTemplates: (ClevertapEmailTemplate | undefined)[]
+  translatableTemplates: (ClevertapEmailTemplate | void)[]
   templateType: string
 }
 

@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { contentItem, itemIdentifiers } from '../commonSchemas'
+import { contentItem } from '../commonSchemas'
 
 export const publishRequestBody = z.object({
   items: z.array(contentItem),

@@ -1,9 +1,9 @@
+import { globalLogger } from '@lokalise/node-core'
 import type { FastifyRequest } from 'fastify'
 
 import { MultiStatusErrorCode } from '../../infrastructure/errors/MultiStatusErrorResponse'
 
 import type { CacheRequestBody, CacheResponse, ListCacheResponse } from './cacheTypes'
-import { globalLogger } from '@lokalise/node-core'
 
 export async function getCache(req: FastifyRequest, reply: ListCacheResponse) {
   const { cacheService } = req.diScope.cradle
