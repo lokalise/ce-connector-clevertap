@@ -1,6 +1,6 @@
+import { listItems, getItems } from '../../integrations/clevertap'
 import type { AuthConfig, IntegrationConfig, ItemIdentifiers } from '../../types'
 import { DynamicHostService } from '../dynamicHostService'
-import { listItems, getItems } from '../../integrations/clevertap'
 import { CacheResponseBodyItems } from '../../integrations/clevertap/mapper/integrationMapperTypes'
 import { ErrorInfo } from '../../infrastructure/errors/MultiStatusErrorResponse'
 import { globalLogger } from '../../infrastructure/errors/globalErrorHandler'
@@ -18,6 +18,23 @@ export class CacheService extends DynamicHostService {
   }
 
   async getItems(
+    config: IntegrationConfig,
+    auth: AuthConfig,
+    ids: ItemIdentifiers[],
+  ): Promise<{
+    items: CacheResponseBodyItems
+    errors: ErrorInfo[]
+  }> {
+    this.setApiHost(config)
+    return await getItems(
+      this.clevertapApiClient,
+      auth.accountId as string,
+      auth.passcode as string,
+      ids,
+    )
+  }
+
+  async getContentBlock(
     config: IntegrationConfig,
     auth: AuthConfig,
     ids: ItemIdentifiers[],
